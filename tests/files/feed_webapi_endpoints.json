@@ -1,0 +1,62 @@
+{
+    "status": {
+      "message": "Success",
+      "code": "200"
+    },
+    "data": [
+      {
+        "date": "2022-02-18",
+        "group": "SITE-A",
+        "type": "SITES",
+        "service": "service-a",
+        "hostname": "host1.example.foo",
+        "notifications": {
+          "contacts": [
+            "john_doe01@example.foo"
+          ],
+          "enabled": true
+        },
+        "tags": {
+          "monitored": "1",
+          "production": "1",
+          "scope": "SCOPEA"
+        }
+      },
+      {
+        "date": "2022-02-18",
+        "group": "SITE-A",
+        "type": "SITES",
+        "service": "service-b",
+        "hostname": "host2.example.foo",
+        "notifications": {
+          "contacts": [
+            "john_doe02@example.foo"
+          ],
+          "enabled": false
+        },
+        "tags": {
+          "monitored": "1",
+          "production": "1",
+          "scope": "SCOPEA"
+        }
+      },
+      {
+        "date": "2022-02-18",
+        "group": "SITE-B",
+        "type": "SITES",
+        "service": "service-x",
+        "hostname": "host3.example.foo",
+        "notifications": {
+          "contacts": [
+            "marco_polo01@example.foo"
+          ],
+          "enabled": false
+        },
+        "tags": {
+          "monitored": "1",
+          "production": "1",
+          "scope": "SCOPEB"
+        }
+      }
+    ]
+}

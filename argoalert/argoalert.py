@@ -7,6 +7,8 @@ import logging
 from defusedxml.minidom import parseString
 from datetime import datetime
 from datetime import timedelta
+from io import StringIO
+import csv
 
 
 def parse_timestamp(timestamp):
@@ -179,7 +181,7 @@ def transform(argo_event, environment, grouptype, timeout, ui_endpoint, report):
         resource = group
         text = "[ {0} ] - {1} {2} is {3}".format(
             environment.upper(), grouptype.capitalize(), group, status.upper())
-        if ui_endpoint is not "":
+        if ui_endpoint:
             attributes["_alert_url"] = ui_group_url(
                 ui_endpoint, report, ts_monitored, grouptype, group, environment)
 
@@ -194,7 +196,7 @@ def transform(argo_event, environment, grouptype, timeout, ui_endpoint, report):
         resource = service + "/" + hostname
         text = "[ {0} ] - Endpoint {1}/{2} is {3}".format(
             environment.upper(), hostname, service, status.upper())
-        if ui_endpoint is not "":
+        if ui_endpoint:
             attributes["_alert_url"] = ui_endpoint_url(
                 ui_endpoint, report, ts_monitored, grouptype, group, service, hostname, environment)
 
@@ -278,6 +280,96 @@ def start_listening(environment, kafka_endpoints, kafka_topic,
         read_and_send(message, environment, alerta_endpoint,
                       alerta_token, options)
 
+
+def argowebapi_to_contacts(endpoints_json, groups_json, use_notif_flag, test_emails):
+    """Transform argo-web-api json response to contacts
+
+    Args:
+        resp_json: str. Data in json format retrieved from argo-web-api
+        use_notif_flag: boolean. Examine or not notifications flag when gathering contacts
+        
+
+    Return:
+        obj: Json representation of contact information
+    """
+
+    contacts = []
+
+    subgroup_types = {}
+
+    # iterate over endpoints
+    if not endpoints_json:
+        return contacts 
+    
+    # if data exists in argo web-api response capture it
+    if "data" not in endpoints_json:
+        return contacts 
+            
+    data = endpoints_json["data"]
+    # data is a list of topology items with possible notification information, iterate through them
+    for indx, item in enumerate(data):
+        subgroup_types[item['group']] = item['type']
+
+        # if item doesn't contains notification information skip
+        if "notifications" not in item:
+            continue
+        notif = item["notifications"]
+        # if we are to honor notification flag check 
+        if use_notif_flag:
+            # if enabled not present or false skip notification item
+            if "enabled" not in notif:
+                continue
+            if notif["enabled"] == False:
+                continue 
+        
+        c={}
+        # check if item is group or endpoint (hint groups have the subgroup field)
+        c["name"] = item['group'] + "\\/" + item['service'] + "\\/" + item['hostname']
+        if test_emails:
+            c["email"] = test_emails[indx % len(test_emails)]
+            c["original_email"] = item.firstChild.nodeValue    
+        else:
+            c["email"] = ';'.join(notif['contacts'])
+        c["type"] = "ENDPOINT"
+        contacts.append(c)
+    
+        # iterate over endpoints
+    if not groups_json:
+        return contacts 
+    
+    # if data exists in argo web-api response capture it
+    if "data" not in groups_json:
+        return contacts 
+            
+    data = groups_json["data"]
+    # data is a list of topology items with possible notification information, iterate through them
+    for indx, item in enumerate(data):
+        
+
+        # if item doesn't contains notification information skip
+        if "notifications" not in item:
+            continue
+        notif = item["notifications"]
+        # if we are to honor notification flag check 
+        if use_notif_flag:
+            # if enabled not present or false skip notification item
+            if "enabled" not in notif:
+                continue
+            if notif["enabled"] == False:
+                continue 
+        
+        c={}
+        # check if item is group or endpoint (hint groups have the subgroup field)
+        c["name"] = item['subgroup'] 
+        if test_emails:
+            c["email"] = test_emails[indx % len(test_emails)]
+            c["original_email"] = item.firstChild.nodeValue    
+        else:
+            c["email"] = ';'.join(notif['contacts'])
+        c["type"] = subgroup_types[item['subgroup']]
+        contacts.append(c)
+    
+    return contacts 
 
 def gocdb_to_contacts(gocdb_xml, use_notif_flag, test_emails):
     """Transform gocdb xml schema info on generic contacts json information
@@ -431,6 +523,7 @@ def contacts_to_alerta(contacts, extras, environment=None):
     return rules
 
 
+
 def get_gocdb(api_url, auth_info, ca_bundle):
     """Http Rest call to gocdb-api to get xml contact information
 
@@ -464,6 +557,46 @@ def get_gocdb(api_url, auth_info, ca_bundle):
 
     return ""
 
+
+def get_webapi_url_endpoints(api_endpoint):
+    return  "https://{0}/api/v2/endpoints".format(api_endpoint)
+
+def get_webapi_url_groups(api_endpoint):
+    return  "https://{0}/api/v2/endpoints".format(api_endpoint)
+
+def get_webapi_feed(url, token):
+    headers = {'Accept':'application/json', 'x-api-key':token}
+    response = requests.get(url,headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def get_simple_feed(url):
+    response = requests.get(url)
+    content = response.content
+    return content
+
+
+def csv_to_json(content):
+    f = StringIO(content.decode('utf-8'))
+    reader = csv.reader(f, delimiter=',')
+
+    num_row = 0
+    results = []
+    header = []
+    for row in reader:
+        if num_row == 0:
+            header = row
+            num_row = num_row + 1
+            continue
+        num_item = 0
+        datum = {}
+        for item in header:
+            datum[item] = row[num_item]
+            num_item = num_item + 1
+        results.append(datum)
+        
+    return results
 
 def write_rules(rules, outfile):
     """Writes alerta email rules to a specific output file

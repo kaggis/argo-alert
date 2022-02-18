@@ -1,6 +1,10 @@
 [feed]
-# Feed type for contacts simple / gocdb
+# Feed type for contacts simple / gocdb / argo-web-api
 feed_type=gocdb
+
+[argo-api]
+endpoint=https://argo-web-api.example.foo
+access_token=s3cr3tt0ke3n
 
 [gocdb]
 # auth_method to be used when contacting gocdb api: basic-auth or cert

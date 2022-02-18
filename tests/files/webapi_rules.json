@@ -1,0 +1,68 @@
+[
+    {
+      "contacts": [
+        "john_doe01@example.foo"
+      ],
+      "exclude": true,
+      "fields": [
+        {
+          "field": "resource",
+          "regex": "^SITE-A\\/service-a\\/host1.example.foo($|\\/)"
+        }
+      ],
+      "name": "rule_SITE-A\\/service-a\\/host1.example.foo"
+    },
+    {
+      "contacts": [
+        "john_doe02@example.foo"
+      ],
+      "exclude": true,
+      "fields": [
+        {
+          "field": "resource",
+          "regex": "^SITE-A\\/service-b\\/host2.example.foo($|\\/)"
+        }
+      ],
+      "name": "rule_SITE-A\\/service-b\\/host2.example.foo"
+    },
+    {
+      "contacts": [
+        "marco_polo01@example.foo"
+      ],
+      "exclude": true,
+      "fields": [
+        {
+          "field": "resource",
+          "regex": "^SITE-B\\/service-x\\/host3.example.foo($|\\/)"
+        }
+      ],
+      "name": "rule_SITE-B\\/service-x\\/host3.example.foo"
+    },
+    {
+      "contacts": [
+        "john_doe02@example.foo"
+      ],
+      "exclude": true,
+      "fields": [
+        {
+          "field": "resource",
+          "regex": "^SITE-A($|\\/)"
+        }
+      ],
+      "name": "rule_SITE-A"
+    },
+    {
+      "contacts": [
+        "john_doe03@example.foo",
+        "johanne_doe06@example.foo"
+      ],
+      "exclude": true,
+      "fields": [
+        {
+          "field": "resource",
+          "regex": "^SITE-B($|\\/)"
+        }
+      ],
+      "name": "rule_SITE-B"
+    }
+  ]

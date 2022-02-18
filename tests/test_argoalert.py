@@ -115,7 +115,42 @@ class TestArgoAlertMethods(unittest.TestCase):
                 self.assertEqual(contacts, exp_json)
 
 
-     # Test gocdb xml to contacts json transformation
+
+    # Test json feed xml to contacts json transformation
+    def test_webapi_feed_to_contacts_notify_flag(self):
+
+        groups_json_fn = get_resource_path("./files/feed_webapi_groups.json")
+        endpoints_json_fn = get_resource_path("./files/feed_webapi_endpoints.json")
+
+        
+        webapi_contacts_fn = get_resource_path("./files/webapi_contacts.json")
+        webapi_contacts_flag_fn = get_resource_path("./files/webapi_contacts_flag.json")
+
+        with open(endpoints_json_fn, 'r') as endpoints_file, open(groups_json_fn, 'r') as groups_file:
+            endpoints_json = json.load(endpoints_file)
+            groups_json = json.load(groups_file)
+
+             # Select all contacts
+            with open(webapi_contacts_fn, 'r') as json_file:
+                json_data = json_file.read().replace('\n', '')
+                exp_json = json.loads(json_data)
+                contacts = argoalert.argowebapi_to_contacts(endpoints_json,groups_json,False,None)
+                self.assertEqual(contacts, exp_json)
+
+                         # Select all contacts
+            with open(webapi_contacts_flag_fn, 'r') as json_file:
+                json_data = json_file.read().replace('\n', '')
+                exp_json = json.loads(json_data)
+                contacts = argoalert.argowebapi_to_contacts(endpoints_json,groups_json,True,None)
+                self.assertEqual(contacts, exp_json)
+
+
+            
+
+            
+ 
+
+    # Test json feed xml to contacts json transformation
     def test_json_feed_to_contacts_notify_flag(self):
 
         json_fn = get_resource_path("./files/sg_feed.json")
@@ -134,9 +169,6 @@ class TestArgoAlertMethods(unittest.TestCase):
                 use_notif_flag = True
                 contacts = argoalert.json_feed_to_contacts(json.dumps(json_og_data), use_notif_flag, None, "SERVICE_GROUP")
 
-                print(contacts)
-                print(exp_json)
-
                 self.assertEqual(contacts, exp_json)
 
             # Select all contacts
@@ -148,7 +180,37 @@ class TestArgoAlertMethods(unittest.TestCase):
                 contacts = argoalert.json_feed_to_contacts(json.dumps(json_og_data), use_notif_flag, None, "SERVICE_GROUP")
 
                 self.assertEqual(contacts, exp_json)
+    
 
+    # Test gocdb xml to contacts json transformation
+    def test_site_gocdb_to_contacts_notify_flag(self):
+
+        xml_fn = get_resource_path("./files/site_gocdb.xml")
+        notify_json_fn = get_resource_path("./files/site_contacts_notify.json")
+        all_json_fn = get_resource_path("./files/site_contacts_all.json")
+
+        with open(xml_fn, 'r') as xml_file:
+            xml_data = xml_file.read().replace('\n', '')
+
+            # Select contacts using notification flag on
+            with open(notify_json_fn, 'r') as json_file:
+                json_data = json_file.read().replace('\n', '')
+                exp_json = json.loads(json_data)
+
+                use_notif_flag = True
+                contacts = argoalert.gocdb_to_contacts(xml_data, use_notif_flag, None)
+
+                self.assertEqual(contacts, exp_json)
+
+            # Select all contacts
+            with open(all_json_fn, 'r') as json_file:
+                json_data = json_file.read().replace('\n', '')
+                exp_json = json.loads(json_data)
+
+                use_notif_flag = False
+                contacts = argoalert.gocdb_to_contacts(xml_data, use_notif_flag, None)
+
+                self.assertEqual(contacts, exp_json)
 
     # Test gocdb xml to contacts json transformation
     def test_site_gocdb_to_contacts_notify_flag(self):
@@ -199,6 +261,25 @@ class TestArgoAlertMethods(unittest.TestCase):
 
                 self.assertEqual(rules_out, exp_out)
                
+    # Test web api contacts to rules
+    def test_sg_contacts_to_alerta(self):
+
+        cfn = get_resource_path("./files/webapi_contacts.json")
+        rfn = get_resource_path("./files/webapi_rules.json")
+
+        with open(rfn, 'r') as ruleJson:
+            rule_data = ruleJson.read().replace('\n', '')
+            exp_json = json.loads(rule_data)
+
+            with open(cfn, 'r') as contactJson:
+                contact_data = contactJson.read().replace('\n', '')
+                contacts = json.loads(contact_data)
+                rules = argoalert.contacts_to_alerta(contacts, [])
+                rules_out = json.dumps(rules, sort_keys=True)
+                exp_out = json.dumps(exp_json, sort_keys=True)
+
+
+                self.assertEqual(rules_out, exp_out)
 
      # Test site contacts to alerta transformation
     def test_site_contacts_to_alerta(self):

@@ -1,0 +1,17 @@
+[
+    {
+      "name": "SITE-A\\/service-a\\/host1.example.foo",
+      "email": "john_doe01@example.foo",
+      "type": "ENDPOINT"
+    },
+    {
+      "name": "SITE-A",
+      "email": "john_doe02@example.foo",
+      "type": "SITES"
+    },
+    {
+      "name": "SITE-B",
+      "email": "john_doe03@example.foo;johanne_doe06@example.foo",
+      "type": "SITES"
+    }
+]

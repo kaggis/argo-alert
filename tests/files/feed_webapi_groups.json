@@ -1,0 +1,40 @@
+{
+    "status": {
+      "message": "Success",
+      "code": "200"
+    },
+    "data": [
+      {
+        "date": "2022-02-18",
+        "group": "X",
+        "type": "PROJECT",
+        "subgroup": "SITE-A",
+        "notifications": {
+          "contacts": [
+            "john_doe02@example.foo"
+          ],
+          "enabled": true
+        },
+        "tags": {
+          "monitored": "1",
+          "scope": "X"
+        }
+      },
+      {
+        "date": "2022-02-18",
+        "group": "X",
+        "type": "PROJECT",
+        "subgroup": "SITE-B",
+        "notifications": {
+          "contacts": [
+            "john_doe03@example.foo", "johanne_doe06@example.foo"
+          ],
+          "enabled": true
+        },
+        "tags": {
+          "monitored": "1",
+          "scope": "X"
+        }
+      }
+    ]
+  }

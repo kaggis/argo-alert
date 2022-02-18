@@ -14,7 +14,23 @@ def main(args=None):
     parser.read(args.config)
 
     feed_type = parser.get("feed","feed_type")
-    
+    rule_file = parser.get("alerta", "mail-rules")
+    log_level = parser.get("logging", "level")
+
+    extra_emails = []
+    # Check if configuration has extra emails defined
+    if parser.has_option("alerta", "extra-emails"):
+        extra_emails = parser.get("alerta", "extra-emails").split(",")
+
+    logging.basicConfig(level=log_level)
+
+    test_emails = None
+    if args.test_emails is not None:
+        test_emails = args.test_emails.split(',')
+
+    environment = None
+    if parser.has_option("alerta", "environment"):
+        environment = parser.get("alerta", "environment")
 
     # Initialize authorization info object
     auth_info = dict()
@@ -36,21 +52,6 @@ def main(args=None):
     if verify:
         ca_bundle = parser.get("gocdb", "cabundle")
     use_notif_flag = parser.getboolean("gocdb", "use_notifications_flag")
-    rule_file = parser.get("alerta", "mail-rules")
-    log_level = parser.get("logging", "level")
-    top_req = parser.get("gocdb", "top_request")
-    sub_req = parser.get("gocdb", "sub_request")
-
-    extra_emails = []
-    # Check if configuration has extra emails defined
-    if parser.has_option("alerta", "extra-emails"):
-        extra_emails = parser.get("alerta", "extra-emails").split(",")
-
-    logging.basicConfig(level=log_level)
-
-    test_emails = None
-    if args.test_emails is not None:
-        test_emails = args.test_emails.split(',')
 
     group_notify_flag = use_notif_flag
     if args.group_notify_flag is not None:
@@ -58,10 +59,9 @@ def main(args=None):
             group_notify_flag = True
         else:
             group_notify_flag = False
-
-    environment = None
-    if parser.has_option("alerta", "environment"):
-        environment = parser.get("alerta", "environment")
+    
+    top_req = parser.get("gocdb", "top_request")
+    sub_req = parser.get("gocdb", "sub_request")
 
     # Get site data from gocdb
     top_url = gocdb_api + top_req
